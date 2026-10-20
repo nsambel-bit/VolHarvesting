@@ -41,7 +41,17 @@ class PortfolioConfig:
 
 
 @dataclass
+class EnhancementConfig:
+    mom_lookback: int = 252       # residual momentum window (days)
+    mom_skip: int = 21            # skip the most recent month
+    jump_threshold: float = 4.0   # |standardized residual| that counts as a jump
+    jump_hold: int = 20           # days the reversal bet stays off after a jump
+    guard_threshold: float = 2.0  # momentum z beyond which the reversal sleeve can't fade
+
+
+@dataclass
 class Config:
     universe: UniverseConfig = field(default_factory=UniverseConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     portfolio: PortfolioConfig = field(default_factory=PortfolioConfig)
+    enhance: EnhancementConfig = field(default_factory=EnhancementConfig)

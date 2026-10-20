@@ -67,4 +67,4 @@ At realistic signal strength the regime layer adds nothing; when regimes are det
 
 ## Real-data result (88 US large caps, 2007–2025)
 
-On real prices the regime layer does not help: no method or ensemble beats the no-regime baseline (net Sharpe 0.32 at 5bp costs), stacking is significantly worse (0.19), and the strategy has been in a drawdown since May 2021. Details, robustness checks and caveats (survivorship, costs, factor leakage) are in [`docs/REAL_DATA_REPORT.md`](docs/REAL_DATA_REPORT.md).
+On real prices the regime layer does not help: no method or ensemble beats the no-regime baseline (net Sharpe 0.32 at 5bp costs), stacking is significantly worse (0.19), and the strategy has been in a drawdown since May 2021. Four tested fixes (slower trading, a residual-momentum sleeve, an earnings-jump filter, a guard against fading runaway winners) reduce but don't remove the 2021–25 loss. Details, robustness checks and caveats (survivorship, costs, factor leakage) are in [`docs/REAL_DATA_REPORT.md`](docs/REAL_DATA_REPORT.md).

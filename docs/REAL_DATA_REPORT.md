@@ -96,6 +96,37 @@ What it was **not**:
 
 Regime detection should, in principle, have caught 2024's switch to continuation and flipped the book. None of the five methods detected it early or reliably enough to change positioning.
 
+## Improvement tests (development 2007–2020, final test 2021–2025)
+
+![Improvements](improvements.png)
+
+Four changes were tested (`scripts/improvements_study.py`). Settings were chosen on 2007–2020 only, from a small pre-declared grid, and 2021–2025 was then evaluated once.
+
+- **A. Slower trading:** trade fraction 0.5, 0.25 or 0.15 of the gap each week. Development net Sharpe fell as trading slowed (0.64, 0.54, 0.44), so the rule kept 0.5.
+- **B. Residual momentum sleeve:** 12-month residual return skipping the latest month, blended at 33% or 50% of risk. Development chose 33%.
+- **C. Jump filter (fixed, untuned):** no reversal bet for 20 days after a residual move beyond 4 standard deviations, an earnings-type jump.
+- **D. Runaway guard (fixed, untuned):** the reversal sleeve may not short a stock whose residual momentum z-score is above 2, or buy one below −2.
+
+| Variant | Net Sharpe 2007–20 | Net Sharpe 2021–25 | Net return / yr 2021–25 | Net Sharpe 2024 | Turnover / week |
+|---|---|---|---|---|---|
+| Baseline | 0.64 | −0.47 | −3.9% | −1.96 | 1.35 |
+| A. Slower trading (0.25) | 0.54 | −0.24 | −1.5% | −1.70 | 0.68 |
+| B. Momentum sleeve (33%) | 0.58 | −0.44 | −3.7% | −1.62 | 1.25 |
+| C. Jump filter | 0.58 | −0.29 | −2.3% | −1.61 | 1.30 |
+| D. Runaway guard | 0.66 | −0.41 | −3.3% | −1.89 | 1.34 |
+| Momentum sleeve alone | −0.08 | 0.05 | 0.6% | 0.79 | 0.35 |
+| Combined (0.5) + B + C + D | 0.47 | −0.26 | −2.2% | −0.84 | 1.19 |
+
+Improvement over the baseline in 2021–25 (net Sharpe; 20-day block bootstrap): A +0.23 (p = 0.07), C +0.18 (p = 0.06), D +0.06 (p = 0.11), B +0.03 (p = 0.45), combined +0.21 (p = 0.25). None is significant at 5%.
+
+**Findings**
+
+1. **No change makes 2021–25 profitable.** The best variants roughly halve the loss but stay negative.
+2. **Costs can't be traded away.** Halving turnover cut costs but lost even more gross return in 2007–2020: the reversal signal is mostly spent within a week, so the strategy needs fast trading and therefore pays high costs. That is structural.
+3. **Residual momentum didn't work in this universe before 2021** (Sharpe −0.08 in 2007–2020). It helped only in 2024 (+0.79), so it is a hedge for that one year rather than a reliable second engine.
+4. **The jump filter is the most promising idea.** It improved the 2021–25 result most, consistent with stocks drifting after earnings surprises rather than reversing. But it lowered 2007–2020 net Sharpe, so the evidence is mixed.
+5. **Most changes trade development performance for test performance** (only the guard improves both, and only slightly). That pattern says the 2021–25 environment differs from the past, not that these changes are better strategies. Adopting them on this evidence would be fitting to hindsight.
+
 ## Survivorship bias
 
 Every stock trades for the full 20 years, so the list is today's largest companies, chosen with hindsight.
@@ -109,7 +140,7 @@ The portfolio is exactly beta- and sector-neutral at each rebalance using estima
 
 ## Recommendations
 
-1. **Don't trade this as is.** The regime layer adds no value here, and the base signal has been losing since 2021.
+1. **Don't trade this as is.** The regime layer adds no value here, the base signal has been losing since 2021, and none of the four tested fixes (above) restores profitability.
 2. **If continuing the research:**
    - test on a broad, point-in-time universe (e.g. historical S&P 500 or Russell 1000 membership, with delisted stocks), since 88 names gives little breadth;
    - cut turnover (longer holding periods, a turnover penalty), because costs consume about 60% of gross return;

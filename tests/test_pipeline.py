@@ -52,6 +52,15 @@ def test_no_lookahead():
     assert np.allclose(p0.trend[past], p1.trend[past]) and np.allclose(p0.rev[past], p1.rev[past])
     for k in p0.z:
         assert np.allclose(p0.z[k][past], p1.z[k][past]), k
+    # enhancement features
+    from volharvest.enhancements import residual_momentum, jump_mask
+    vol0, vol1 = rolling_vol(e0, cfg.model.vol_window), rolling_vol(e1, cfg.model.vol_window)
+    m0 = residual_momentum(e0, vol0, p0.dates)
+    m1 = residual_momentum(e1, vol1, p1.dates)
+    assert np.allclose(m0[past], m1[past], equal_nan=True)
+    z0 = np.zeros_like(e0); z0[1:] = e0[1:] / vol0[:-1]
+    z1 = np.zeros_like(e1); z1[1:] = e1[1:] / vol1[:-1]
+    assert (jump_mask(z0, p0.dates)[past] == jump_mask(z1, p1.dates)[past]).all()
 
 
 if __name__ == "__main__":
