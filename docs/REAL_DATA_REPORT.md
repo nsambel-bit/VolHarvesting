@@ -78,9 +78,23 @@ Every regime variant is at or below the baseline. Stacking is reliably worse: it
 
 The edge decays over time and turns clearly negative from 2023. The no-regime model peaked in May 2021 and was in August 2025 was 28.7 percentage points of cumulative return below that peak, about four times its annual volatility, with no recovery yet.
 
-## Why 2023–25 went wrong
+## Why the strategy has been in drawdown since May 2021
 
-The no-regime model's 2023–25 losses are concentrated in a few stocks with large, persistent moves: GE (−3.6% of capital), NVDA (−3.4%), APH (−2.7%) and ORCL (−2.2%). By sector, technology lost 6.3%, industrials and materials 3.7% and financials 3.2%. This was a market of narrow, sustained leadership in which both the one-week reversal and the one-month trend signals lost money. Regime detection did not help: it couldn't distinguish these persistent moves early enough to change positioning.
+![Drawdown analysis](drawdown_analysis.png)
+
+From the May 2021 peak to August 2025, the no-regime model lost 25.2% of capital net: **14.1% from trading costs and 11.1% from gross losses**. Four findings explain it (`scripts/drawdown_analysis.py`):
+
+1. **The strategy was never a trend follower.** At every yearly refit, the model's weight on the one-month "trend" signal is negative (−0.006 to −0.031), as is its weight on the one-week signal. On these stocks, both past moves have mostly predicted *reversals* (negative IC in most years), so the walk-forward fit learned to fade both. The "trend only" row in the tables above is therefore a one-month reversal strategy. In practice the whole system is a short-horizon contrarian strategy: it sells recent residual winners and buys recent residual losers.
+2. **In 2024, reversal turned into continuation.** Both signals' ICs turned positive in 2024 (one-month +0.045, t ≈ 1.7; one-week +0.021), the strongest continuation in the sample. A contrarian book lost 13.7% gross that year, its worst year, more than the whole drawdown's gross loss.
+3. **The losses came from fading a handful of persistent winners.** Since the peak, the ten worst stocks lost 26.6% while the rest of the book made 15.4%. The model was short each of the top losers most of the time: NVDA (−6.0%, short on 68% of days while it rose about 1,000%), GE (−3.7%), NFLX (−2.9%), COST (−2.5%), APH (−2.1%), ORCL (−2.0%) and LLY (−1.7%).
+4. **Costs turned a shrinking edge into a loss.** Costs ran a steady 3.2–3.4% a year. Gross P&L fell from an average of about 9% a year in 2008–2019 to 3.7% in 2021 and 6.9% in 2022, then −1.3% in 2023: barely enough to cover costs even before 2024.
+
+What it was **not**:
+
+- **Not a lack of opportunity.** Cross-sectional dispersion of weekly residual returns was normal (2.5–3.1% in 2021–25, versus 2.1–2.7% in 2010–2019).
+- **Not a broad factor bet.** Regressing daily P&L on the market, a momentum factor and a mega-cap factor explains only about 6% of variance before and after the peak, and the factor contributions roughly cancel since the peak: market +4.7%, momentum −1.0%, mega-cap −3.7%. The strategy is structurally short momentum (beta −0.09) and mega-caps (−0.06), but the losses were in specific stocks, not those factors.
+
+Regime detection should, in principle, have caught 2024's switch to continuation and flipped the book. None of the five methods detected it early or reliably enough to change positioning.
 
 ## Survivorship bias
 
@@ -100,5 +114,6 @@ The portfolio is exactly beta- and sector-neutral at each rebalance using estima
    - test on a broad, point-in-time universe (e.g. historical S&P 500 or Russell 1000 membership, with delisted stocks), since 88 names gives little breadth;
    - cut turnover (longer holding periods, a turnover penalty), because costs consume about 60% of gross return;
    - neutralize momentum and size, and exclude names around earnings;
-   - shrink betas toward 1 or estimate them on weekly data to reduce beta leakage.
+   - shrink betas toward 1 or estimate them on weekly data to reduce beta leakage;
+   - add a genuine slower trend signal (e.g. 6–12 month residual momentum), since the current one-month "trend" signal is traded as a reversal and the system has no way to profit from persistent winners like those of 2024.
 3. **Simplest robust choice:** if regime information is used at all, use the plain average, never stacking.
