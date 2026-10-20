@@ -30,12 +30,13 @@ def rolling_beta(returns: np.ndarray, market: np.ndarray, window: int, min_obs: 
     return beta
 
 
-def residualize(returns: np.ndarray, sector: np.ndarray, beta_window: int):
+def residualize(returns: np.ndarray, sector: np.ndarray, beta_window: int, market: np.ndarray | None = None):
     """Residual = return - beta_hat * market - same-day sector average of (return - beta_hat * market).
 
-    Market proxy is the equal-weighted universe return. Returns (residuals, beta_hat, market).
+    Market proxy defaults to the equal-weighted universe return. Returns (residuals, beta_hat, market).
     """
-    market = returns.mean(axis=1)
+    if market is None:
+        market = returns.mean(axis=1)
     beta = rolling_beta(returns, market, beta_window)
     e = returns - beta * market[:, None]
     for s in np.unique(sector):

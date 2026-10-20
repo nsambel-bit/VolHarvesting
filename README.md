@@ -23,9 +23,10 @@ src/volharvest/
   backtest.py         weekly backtest with costs; Sharpe, turnover, realized beta, factor R²
   run.py              end-to-end CLI
   charts.py           summary chart
-scripts/              single-asset studies behind the design (mirror identity, regime-accuracy sweep)
+scripts/              single-asset studies (mirror identity, regime-accuracy sweep); real-data study and charts
 tests/                neutrality, caps, and no-look-ahead tests
-docs/REPORT.md        method, results and caveats
+docs/REPORT.md        synthetic study: method, results and caveats
+docs/REAL_DATA_REPORT.md  real-data study (88 US large caps)
 ```
 
 ## Quick start
@@ -63,3 +64,7 @@ True regimes are unknown on real data, so judge each method by its out-of-sample
 | Oracle (true regime) | 3.81 | 9.30 |
 
 At realistic signal strength the regime layer adds nothing; when regimes are detectable, averaging beats voting and stacking is best. Absolute Sharpe ratios are inflated by the clean synthetic setup.
+
+## Real-data result (88 US large caps, 2007–2025)
+
+On real prices the regime layer does not help: no method or ensemble beats the no-regime baseline (net Sharpe 0.32 at 5bp costs), stacking is significantly worse (0.19), and the strategy has been in a drawdown since May 2021. Details, robustness checks and caveats (survivorship, costs, factor leakage) are in [`docs/REAL_DATA_REPORT.md`](docs/REAL_DATA_REPORT.md).

@@ -1,0 +1,89 @@
+ticker,sector
+AAPL,Information Technology
+MSFT,Information Technology
+NVDA,Information Technology
+ORCL,Information Technology
+CRM,Information Technology
+AMD,Information Technology
+CSCO,Information Technology
+ACN,Information Technology
+ADBE,Information Technology
+TXN,Information Technology
+IBM,Information Technology
+QCOM,Information Technology
+INTU,Information Technology
+AMAT,Information Technology
+ADI,Information Technology
+MU,Information Technology
+LRCX,Information Technology
+KLAC,Information Technology
+SNPS,Information Technology
+APH,Information Technology
+CDNS,Information Technology
+MSI,Information Technology
+GOOGL,Communication Services
+NFLX,Communication Services
+DIS,Communication Services
+VZ,Communication Services
+CMCSA,Communication Services
+T,Communication Services
+AMZN,Consumer Discretionary
+HD,Consumer Discretionary
+LOW,Consumer Discretionary
+BKNG,Consumer Discretionary
+TJX,Consumer Discretionary
+BRK-B,Financials
+JPM,Financials
+BAC,Financials
+WFC,Financials
+SPGI,Financials
+AXP,Financials
+SCHW,Financials
+BLK,Financials
+CB,Financials
+C,Financials
+FI,Financials
+CME,Financials
+PGR,Financials
+MMC,Financials
+USB,Financials
+LLY,Health Care
+UNH,Health Care
+JNJ,Health Care
+TMO,Health Care
+MRK,Health Care
+ABT,Health Care
+AMGN,Health Care
+PFE,Health Care
+SYK,Health Care
+BSX,Health Care
+MDT,Health Care
+VRTX,Health Care
+GILD,Health Care
+REGN,Health Care
+BMY,Health Care
+WMT,Consumer Staples
+PG,Consumer Staples
+COST,Consumer Staples
+KO,Consumer Staples
+PEP,Consumer Staples
+MDLZ,Consumer Staples
+CL,Consumer Staples
+XOM,Energy
+CVX,Energy
+COP,Energy
+SLB,Energy
+EOG,Energy
+RTX,Industrials & Materials
+HON,Industrials & Materials
+GE,Industrials & Materials
+CAT,Industrials & Materials
+ADP,Industrials & Materials
+ITW,Industrials & Materials
+CSX,Industrials & Materials
+LIN,Industrials & Materials
+NEE,Utilities & Real Estate
+SO,Utilities & Real Estate
+DUK,Utilities & Real Estate
+AMT,Utilities & Real Estate
+PLD,Utilities & Real Estate

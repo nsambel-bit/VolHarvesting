@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 from volharvest.config import Config
 from volharvest.universe import synthetic_universe, load_csv_universe
@@ -39,10 +40,14 @@ def main(args):
     cfg = Config()
     cfg.universe.trend_eta, cfg.universe.mr_kappa = SCENARIOS[args.scenario]
     cfg.portfolio.trade_fraction = args.trade_fraction
+    if args.cost_bps is not None:
+        cfg.portfolio.cost_bps = args.cost_bps
+    if args.max_weight is not None:
+        cfg.portfolio.max_weight = args.max_weight
     t0 = time.time()
-    U = (load_csv_universe(args.prices, args.sectors) if args.prices
-         else synthetic_universe(cfg.universe))
-    e, beta_hat, market = residualize(U.returns, U.sector, cfg.model.beta_window)
+    U = (load_csv_universe(args.prices, args.sectors, market_col=args.market, drop_last_row=args.drop_last_row)
+         if args.prices else synthetic_universe(cfg.universe))
+    e, beta_hat, market = residualize(U.returns, U.sector, cfg.model.beta_window, market=U.market)
     vol = rolling_vol(e, cfg.model.vol_window)
     z = np.zeros_like(e)
     z[1:] = e[1:] / vol[:-1]                                  # standardize by yesterday's vol
@@ -50,7 +55,7 @@ def main(args):
     panel = Panel(e, vol, scores, cfg.model, regime=U.regime)
 
     variants = BASELINES + list(cfg.model.methods) + COMBOS + (["oracle"] if U.regime is not None else [])
-    results, curves, coefs = {}, {}, {}
+    results, curves, coefs, daily = {}, {}, {}, {}
     for v in variants:
         trade, alpha, ch = walk_forward(panel, v, cfg.model)
         bt = run_backtest(U.returns, panel, trade, alpha, beta_hat, U.sector, cfg)
@@ -60,6 +65,8 @@ def main(args):
         results[v] = {k: float(x) for k, x in res.items()}
         curves[v] = np.cumsum(bt["net"]).tolist()
         coefs[v] = ch[-1][1].round(4).tolist()
+        daily[f"{v}__gross"], daily[f"{v}__net"] = bt["gross"], bt["net"]
+        daily["day_index"] = bt["days"]
 
     diag = {}
     if U.regime is not None:
@@ -75,6 +82,10 @@ def main(args):
     Path(args.out).mkdir(parents=True, exist_ok=True)
     (Path(args.out) / "results.json").write_text(json.dumps(out, indent=2))
     np.savez(Path(args.out) / "curves.npz", **{k: np.array(c) for k, c in curves.items()})
+    # dated daily P&L per variant (gross and net), for robustness analysis
+    pnl = pd.DataFrame({k: v for k, v in daily.items() if k != "day_index"},
+                       index=pd.DatetimeIndex(np.asarray(U.dates)[daily["day_index"]], name="date"))
+    pnl.to_csv(Path(args.out) / "daily_pnl.csv")
 
     print(f"{'variant':14s} {'Sh gross':>8s} {'Sh net':>7s} {'IC':>6s} {'turn/wk':>7s} {'beta':>6s} {'fac R2':>6s} {'AUC':>5s}")
     for v, r in results.items():
@@ -95,4 +106,8 @@ if __name__ == "__main__":
     p.add_argument("--scenario", choices=list(SCENARIOS), default="realistic")
     p.add_argument("--trade-fraction", type=float, default=1.0,
                    help="fraction of the gap to target traded each week (1 = full)")
+    p.add_argument("--market", help="price column to use as market proxy (e.g. ^GSPC); default: equal-weighted")
+    p.add_argument("--cost-bps", type=float, help="one-way cost per unit traded, overrides config")
+    p.add_argument("--max-weight", type=float, help="per-name weight cap (fraction of capital), overrides config")
+    p.add_argument("--drop-last-row", action="store_true", help="drop the final date (partial-day snapshot)")
     main(p.parse_args())

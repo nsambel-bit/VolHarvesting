@@ -26,6 +26,8 @@ class Universe:
     regime: np.ndarray | None  # (T, N) 1 = trending, 0 = mean-reverting (None for real data)
     dates: pd.DatetimeIndex
     tickers: list
+    market: np.ndarray | None = None   # (T,) market proxy returns; None = equal-weighted universe
+    sector_names: list | None = None
 
 
 def synthetic_universe(cfg: UniverseConfig) -> Universe:
@@ -62,18 +64,28 @@ def synthetic_universe(cfg: UniverseConfig) -> Universe:
     return Universe(returns, sector, beta, regime, dates, tickers)
 
 
-def load_csv_universe(prices_csv: str, sectors_csv: str) -> Universe:
+def load_csv_universe(prices_csv: str, sectors_csv: str, market_col: str | None = None,
+                      drop_last_row: bool = False) -> Universe:
     """Real-data entry point.
 
     prices_csv:  wide table, first column = date, one column per ticker (adjusted closes).
+                 Columns not listed in sectors_csv (ETFs, indices) are not traded.
     sectors_csv: two columns, ticker,sector.
+    market_col:  column of prices_csv to use as the market proxy (e.g. ^GSPC);
+                 default None = equal-weighted average of the traded stocks.
+    drop_last_row: drop the final date (e.g. when it is an intraday snapshot).
     Missing prices are forward-filled up to 5 days, then the return is set to 0.
     """
     px = pd.read_csv(prices_csv, index_col=0, parse_dates=True).sort_index()
+    if drop_last_row:
+        px = px.iloc[:-1]
     sec = pd.read_csv(sectors_csv).set_index("ticker")["sector"]
     tickers = [t for t in px.columns if t in sec.index]
+    mkt = None
+    if market_col is not None:
+        mkt = px[market_col].ffill(limit=5).pct_change(fill_method=None).iloc[1:].fillna(0.0).values
     px = px[tickers].ffill(limit=5)
-    rets = px.pct_change().iloc[1:].fillna(0.0)
-    codes, _ = pd.factorize(sec.loc[tickers])
+    rets = px.pct_change(fill_method=None).iloc[1:].fillna(0.0)
+    codes, names = pd.factorize(sec.loc[tickers])
     return Universe(rets.values, np.asarray(codes), np.full(len(tickers), np.nan),
-                    None, rets.index, tickers)
+                    None, rets.index, tickers, market=mkt, sector_names=list(names))

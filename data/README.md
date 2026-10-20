@@ -24,7 +24,7 @@ AAPL,Information Technology
 XOM,Energy
 ```
 
-Tickers missing from `sectors.csv` are dropped. Then run:
+Tickers missing from `sectors.csv` are dropped (that is how ETFs and indices are excluded from trading). The committed `sectors.csv` covers the 88 large caps used in `docs/REAL_DATA_REPORT.md`. Then run (add `--market ^GSPC` to use an index column as the market proxy):
 
 ```bash
 python -m volharvest.run --prices data/prices.csv --sectors data/sectors.csv --trade-fraction 0.5 --out output/real
